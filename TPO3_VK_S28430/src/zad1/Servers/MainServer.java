@@ -10,13 +10,13 @@ import java.util.Map;
 
 public class MainServer
 {
-	public static final int MAIN_SERVER_PORT = 5_000;
+	public static final int MAIN_SERVER_PORT = 5001;
 
-	private final static Map<String, DictionaryServerInterface> dictionaryServers = new HashMap<>();
+	private final static Map<String, Class<? extends DictionaryServerBase>> dictionaryServers = new HashMap<>();
 
 	public static void main(String[] args) throws IOException
 	{
-		dictionaryServers.put("EN", new ENDictionaryServer());
+		dictionaryServers.put("EN", ENDictionaryServer.class);
 
 		try(ServerSocket serverSocket = new ServerSocket(MAIN_SERVER_PORT))
 		{
@@ -24,7 +24,7 @@ public class MainServer
 			while (true)
 			{
 				Socket clientSocket = serverSocket.accept();
-
+				System.out.println("Client connected");
 
 				Thread clientThread = new Thread(new MainServerHandler(clientSocket, dictionaryServers));
 				clientThread.start();

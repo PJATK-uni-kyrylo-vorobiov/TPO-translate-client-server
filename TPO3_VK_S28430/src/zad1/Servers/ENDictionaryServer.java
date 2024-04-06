@@ -3,12 +3,13 @@ package zad1.Servers;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ENDictionaryServer implements DictionaryServerInterface
+public class ENDictionaryServer extends DictionaryServerBase
 {
 	private final Map<String, String> translations;
 
-	public ENDictionaryServer()
+	public ENDictionaryServer(String clientAddress, String clientPort)
 	{
+		super(clientAddress, clientPort);
 		translations = new HashMap<>();
 		translations.putAll(Map.of(
 				"kot", "cat",
