@@ -1,7 +1,6 @@
 package zad1.Handlers;
 
 import zad1.Servers.DictionaryServerBase;
-import zad1.Servers.ENDictionaryServer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -29,13 +28,20 @@ public class MainServerHandler implements Runnable
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-			out.println("Waiting for input");
+			out.println("Waiting for input in the following format: word_to_translate language_code port");
 
 			String input;
 			while ((input = in.readLine()) == null)
 			{}
 
 			String[] inputTokens = input.split(" ");
+
+			if (inputTokens.length != 3)
+			{
+				out.println("Invalid input");
+				return;
+			}
+
 			String word = inputTokens[0], languageCode = inputTokens[1], port = inputTokens[2];
 			System.out.println("Your input: " + Arrays.toString(inputTokens));
 			System.out.flush();
@@ -47,10 +53,13 @@ public class MainServerHandler implements Runnable
 				out.println("The provided language code is not available");
 				return;
 			}
+			out.println("Translating your word...");
 
 			DictionaryServerBase languageServer = languageServerClass
 					.getDeclaredConstructor(String.class, String.class)
 					.newInstance(clientSocket.getInetAddress().getHostAddress(), port);
+
+			languageServer.sendResponse(word);
 		}
 		catch (Exception e)
 		{

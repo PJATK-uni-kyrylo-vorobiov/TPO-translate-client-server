@@ -8,5 +8,7 @@ public abstract class DictionaryServerBase
 		this.clientAddress = clientAddress;
 		this.clientPort = clientPort;
 	}
-	public abstract String translateWord(String word);
+	protected abstract String translateWord(String word);
+
+	public abstract void sendResponse(String word);
 }
