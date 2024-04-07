@@ -29,7 +29,7 @@ public class ENDictionaryServer extends DictionaryServerBase
 	public void sendResponse(String word)
 	{
 		String translation = translateWord(word);
-		try(Socket socket = new Socket(clientAddress, Integer.parseInt(clientPort)))
+		try (Socket socket = new Socket(clientAddress, Integer.parseInt(clientPort)))
 		{
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 			out.println(translation);

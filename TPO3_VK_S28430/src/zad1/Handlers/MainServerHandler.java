@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.Map;
 
 public class MainServerHandler implements Runnable
@@ -23,43 +22,49 @@ public class MainServerHandler implements Runnable
 	@Override
 	public void run()
 	{
-		try
+		try (clientSocket)
 		{
-			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-
-			out.println("Waiting for input in the following format: word_to_translate language_code port");
-
-			String input;
-			while ((input = in.readLine()) == null)
-			{}
-
-			String[] inputTokens = input.split(" ");
-
-			if (inputTokens.length != 3)
+			while (true)
 			{
-				out.println("Invalid input");
-				return;
+				BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+				out.println("Waiting for input in the following format: word_to_translate language_code port, " +
+						"Or enter 'exit' to end the program");
+
+				String input;
+				while ((input = in.readLine()) == null)
+				{}
+
+				if (input.equals("exit")) break;
+
+				String[] inputTokens = input.split(" ");
+
+				if (inputTokens.length != 3)
+				{
+					out.println("Invalid input");
+					return;
+				}
+
+				String word = inputTokens[0].toLowerCase(), languageCode = inputTokens[1].toUpperCase(), port = inputTokens[2];
+
+				Class<? extends DictionaryServerBase> languageServerClass = dictionaryServers.get(languageCode);
+
+				if (languageServerClass == null)
+				{
+					out.println("The provided language code is not available");
+					return;
+				}
+				out.println("Translating '" + word + "' ...");
+
+				DictionaryServerBase languageServer = languageServerClass
+						.getDeclaredConstructor(String.class, String.class)
+						.newInstance(clientSocket.getInetAddress().getHostAddress(), port);
+
+				if (word.equals("pies")) Thread.sleep(5_000);
+				else Thread.sleep(1_000);
+				languageServer.sendResponse(word);
 			}
-
-			String word = inputTokens[0], languageCode = inputTokens[1], port = inputTokens[2];
-			System.out.println("Your input: " + Arrays.toString(inputTokens));
-			System.out.flush();
-
-			Class<? extends DictionaryServerBase> languageServerClass = dictionaryServers.get(languageCode);
-
-			if (languageServerClass == null)
-			{
-				out.println("The provided language code is not available");
-				return;
-			}
-			out.println("Translating your word...");
-
-			DictionaryServerBase languageServer = languageServerClass
-					.getDeclaredConstructor(String.class, String.class)
-					.newInstance(clientSocket.getInetAddress().getHostAddress(), port);
-
-			languageServer.sendResponse(word);
 		}
 		catch (Exception e)
 		{

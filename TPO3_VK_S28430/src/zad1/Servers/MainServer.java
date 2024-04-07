@@ -19,7 +19,7 @@ public class MainServer
 	{
 		dictionaryServers.put("EN", ENDictionaryServer.class);
 
-		try(ServerSocket serverSocket = new ServerSocket(MAIN_SERVER_PORT))
+		try (ServerSocket serverSocket = new ServerSocket(MAIN_SERVER_PORT))
 		{
 			System.out.printf("Main Server listening on port %d...%n", MAIN_SERVER_PORT);
 			while (true)
